@@ -1,4 +1,4 @@
-import { GroupProps, useFrame } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 import {
   AnimationClip,
@@ -11,6 +11,8 @@ import {
 } from "three";
 import { create } from "zustand";
 import { InstancedBatchedSkinnedMesh } from "./instanced-skinned-mesh";
+
+type GroupProps = React.ComponentProps<"group">;
 
 interface InstancesProviderProps {
   mesh: SkinnedMesh | SkinnedMesh[];
