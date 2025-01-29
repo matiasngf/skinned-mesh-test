@@ -1,5 +1,13 @@
 import { useFrame } from "@react-three/fiber";
-import { forwardRef, useEffect, useMemo, useRef } from "react";
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   AnimationClip,
   Group,
@@ -39,12 +47,17 @@ export const createInstancedSkinnedMesh = <T extends string>() => {
     geometryId: null,
   }));
 
+  /**  Since strinct mode run this twice, we need to store the instances */
+  // const instances = new Map<string, InstancedBatchedSkinnedMesh>();
+
   /** Create the instanced mesh that will be rendered */
   function InstancedMesh({ mesh, count, animations }: InstancesProviderProps) {
     // prevent re-render
     const refs = useRef({ mesh, animations });
 
-    const instancedMesh = useMemo(() => {
+    const componentId = useId();
+
+    useLayoutEffect(() => {
       const { mesh, animations } = refs.current;
       let maxPos = 0;
       let maxIdx = 0;
@@ -67,15 +80,13 @@ export const createInstancedSkinnedMesh = <T extends string>() => {
         material = mesh.material as MeshStandardMaterial;
       }
 
+      // let instancer: InstancedBatchedSkinnedMesh | null = null;
       const instancer = new InstancedBatchedSkinnedMesh({
         maxInstanceCount: count,
         maxVertexCount: maxPos,
         maxIndexCount: maxIdx,
         material,
       });
-
-      instancer.frustumCulled = false;
-
       if (Array.isArray(mesh)) {
         mesh.forEach((m) => {
           instancer.addGeometry(m.geometry);
@@ -83,18 +94,19 @@ export const createInstancedSkinnedMesh = <T extends string>() => {
       } else {
         instancer.addGeometry(mesh.geometry);
       }
-
       animations.forEach((animation) => {
         const skeleton = Array.isArray(mesh) ? mesh[0].skeleton : mesh.skeleton;
         instancer.addAnimation(skeleton, animation);
       });
 
+      instancer.frustumCulled = false;
+
       useInstancedMesh.setState({
         instancedMesh: instancer,
       });
-
-      return instancer;
     }, [refs, count]);
+
+    const instancedMesh = useInstancedMesh((state) => state.instancedMesh);
 
     useFrame((_, delta) => {
       if (!instancedMesh) return;
@@ -103,7 +115,7 @@ export const createInstancedSkinnedMesh = <T extends string>() => {
       instancedMesh.update(delta);
     });
 
-    return <primitive object={instancedMesh} />;
+    return instancedMesh && <primitive object={instancedMesh} />;
   }
 
   /** Create the component that will position the instances */

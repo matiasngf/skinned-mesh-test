@@ -112,6 +112,8 @@ export class InstancedBatchedSkinnedMesh extends THREE.BatchedMesh {
     maxIndexCount,
     material,
   }: InstancedBatchedSkinnedMeshParams) {
+    console.log('Creating instanced mesh', crypto.randomUUID());
+
     super(maxInstanceCount, maxVertexCount, maxIndexCount, material);
     this.offsets = Array(maxInstanceCount).fill(0);
     this.instanceData = Array(maxInstanceCount)
@@ -315,7 +317,7 @@ export class InstancedBatchedSkinnedMesh extends THREE.BatchedMesh {
       instance.time += delta * instance.timeSpeed;
       instance.time = THREE.MathUtils.clamp(
         instance.time -
-          Math.floor(instance.time / clip.duration) * clip.duration,
+        Math.floor(instance.time / clip.duration) * clip.duration,
         0,
         clip.duration,
       );

@@ -1,6 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import { createInstancedSkinnedMesh } from "../instanced-skinned-mesh";
 import type * as THREE from "three";
+import { memo } from "react";
 
 const {
   InstancePosition: CharacterPosition,
@@ -24,7 +25,7 @@ interface CharactersGLTF {
 
 export { CharacterPosition, useCharacterMesh };
 
-export function CharacterInstanceConfig() {
+function CharacterInstanceConfigInner() {
   const { nodes, animations } = useGLTF(
     "https://assets.basehub.com/bca6c699/1c1acd8f77f614795ab909096d6c0f27/theoanimationa02.glb"
   ) as unknown as CharactersGLTF;
@@ -39,3 +40,5 @@ export function CharacterInstanceConfig() {
     </>
   );
 }
+
+export const CharacterInstanceConfig = memo(CharacterInstanceConfigInner);
